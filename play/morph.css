@@ -1,0 +1,31 @@
+.ying{
+    -webkit-animation: ying 4s infinite; /* Chrome, Safari, Opera */
+    animation: ying 4s infinite;
+}
+.yang{
+    -webkit-animation: yang 4s infinite; /* Chrome, Safari, Opera */
+    animation: yang 4s infinite;	
+}
+
+
+@keyframes ying {
+    0%   {transform: scaleX(1.03) scaleY(0.97);}
+    50%  {transform: scaleX(0.97) scaleY(1.03);}
+    100% {transform: scaleX(1.03) scaleY(0.97);}
+}
+@-webkit-keyframes ying {
+    0%   {transform: scaleX(1.03) scaleY(0.97);}
+    50%  {transform: scaleX(0.97) scaleY(1.03);}
+    100% {transform: scaleX(1.03) scaleY(0.97);}
+}
+
+@keyframes yang {
+    0%  {transform: scaleX(0.97) scaleY(1.03);}
+    50% {transform: scaleX(1.03) scaleY(0.97);}
+    100%  {transform: scaleX(0.97) scaleY(1.03);}
+}
+@-webkit-keyframes yang {
+    0%  {transform: scaleX(0.97) scaleY(1.03);}
+    50% {transform: scaleX(1.03) scaleY(0.97);}
+    100%  {transform: scaleX(0.97) scaleY(1.03);}
+}
