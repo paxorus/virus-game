@@ -3,7 +3,7 @@
 Infecting host cell generates more viruses
 */
 
-var HOST_NUM=7;
+var HOST_NUM=3;
 var DIM=[window.innerWidth,window.innerHeight];
 var body=document.getElementsByTagName("body")[0];
 var host_arr=[];

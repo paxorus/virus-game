@@ -1,8 +1,13 @@
 /* Prakhar Sahay 03/24/2015
 
-Keydown LR will rotate
+WASD and arrow keys to move two viruses. 
 */
 
+// var t0,time=0,freq=1000;
+// setInterval(function(){
+// 	document.getElementById("fps_disp").textContent=freq*(time-t0);
+// 	t0=time;
+// },1000/freq);
 var raf= requestAnimationFrame || webkitRequestAnimationFrame || mozRequestAnimationFrame || oRequestAnimationFrame
 	|| msRequestAnimationFrame || function(callback,element){setTimeout(callback,1000/60)};
 function Virus(elem,x,y){
@@ -51,7 +56,7 @@ document.addEventListener("keydown",function(ev){
 		case 38:case 40:case 87:case 83://up,down
 			var inProgress=virus_arr[index].pushing;
 			if(!inProgress){
-				virus_arr[index].pushing=true;	
+				virus_arr[index].pushing=true;
 				raf(function(){pushVirus(virus_arr[index],(ev.keyCode==40 || ev.keyCode==83)?-3:3)});
 			}
 			break;
@@ -67,3 +72,4 @@ document.addEventListener("keyup",function(ev){
 		case 38:case 40:case 87:case 83:virus_arr[index].pushing=false;break;
 	}
 });
+

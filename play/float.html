@@ -3,13 +3,16 @@
 	<style>
 		.virus{position:absolute;width:100px;height:100px;}
 		.host{position:absolute;width:200px;height:200px;}
-
+		.macro{position:absolute;width:200px;height:200px;}
 	</style>
 	<link rel="stylesheet" href="morph.css">
 	</head>
 	<body>
+		<div style="position:absolute;top:0;right:0"><span id="fps_disp">0</span> fps</div>
+
 		<img id="blue_vir" src="virus.svg" class="virus">
 		<img id="red_vir" src="virus2.svg" class="virus">
+		<img id="macro1" src="macrophage.svg" class="macro ying">
 
 		<script src="float.js"></script>
 		<script src="host.js"></script>
