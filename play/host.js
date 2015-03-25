@@ -16,8 +16,22 @@ for(var i=0;i<HOST_NUM;i++){
 	body.appendChild(img);
 }
 
-function Host(elem){
+function Host(elem,i){
 	this.elem=elem;
-	this.elem.style.left=Math.random()*(DIM[0]-200)+"px";
-	this.elem.style.top=Math.random()*(DIM[1]-200)+"px";
+	this.x=Math.floor(Math.random()*(DIM[0]-200));
+	this.elem.style.left=this.x+"px";
+	this.y=Math.floor(Math.random()*(DIM[1]-200));
+	this.elem.style.top=this.y+"px";
+	this.h_disp=getHDisp(this.x,this.y);
+	this.health=50;
+	this.rate=0;
+}
+
+function getHDisp(x,y){
+	var h_disp=document.createElement("div");
+	h_disp.className="health_disp";
+	h_disp.style.left=(x)+"px";
+	h_disp.style.top=(y)+"px";
+	body.appendChild(h_disp);
+	return h_disp;
 }

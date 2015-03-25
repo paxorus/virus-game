@@ -1,20 +1,24 @@
 <html>
 	<head><title>Beta v0.0</title>
 	<style>
-		.virus{position:absolute;width:100px;height:100px;}
+		.rc_virus{position:absolute;width:100px;height:100px;}
+		.virus{position:absolute;width:75px;height:75px;}
 		.host{position:absolute;width:200px;height:200px;}
 		.macro{position:absolute;width:200px;height:200px;}
+		.health_disp{position:absolute;color:white;line-height:200px;width:200px;text-align:center;font-size:36px;z-index:5;font-family:'Ubuntu';}
 	</style>
-	<link rel="stylesheet" href="morph.css">
+	<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+	<!--<link rel="stylesheet" href="morph.css">-->
 	</head>
-	<body>
+	<body style="overflow:hidden">
 		<div style="position:absolute;top:0;right:0"><span id="fps_disp">0</span> fps</div>
 
-		<img id="blue_vir" src="virus.svg" class="virus">
-		<img id="red_vir" src="virus2.svg" class="virus">
+		<img id="blue_vir" src="virus1.svg" class="rc_virus">
+		<img id="red_vir" src="virus2.svg" class="rc_virus">
 		<img id="macro1" src="macrophage.svg" class="macro ying">
 
-		<script src="float.js"></script>
+		<script src="virus_control.js"></script>
+		<script src="infection.js"></script>
 		<script src="host.js"></script>
 
 	</body>
