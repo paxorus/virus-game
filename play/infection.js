@@ -5,7 +5,7 @@ Hitting spacebar begins the attack. Each raf the proximities are studied and dam
 
 var lysing=false;// ignore extraneous space bar pressing
 var floating=false;// ignore extraneous lysing
-var STICKINESS=0.5;// probability of sticking
+var STICKINESS=0.2;// probability of sticking
 var PROLIFERATION=4;
 var PROG_SPEED=3;
 
