@@ -1,88 +1,167 @@
-var loadedNames,con,o,PANEL,panel,zooming,MAX_ZOOM,imgs,paint;// antroz.js
-var MAX_ZOOM=2;
-var zoomer=document.getElementById("zoomer");
-var canvas=document.getElementById("canvas");
-var con=canvas.getContext("2d");
-var body=document.getElementsByTagName("body")[0];
+var loadedNames,con,o,PANEL,panel,zooming,MAX_ZOOM,paint;// antroz.js
 
-function Vector(xarg,yarg){
-    this.set=function(x,y){this.x=x;this.y=y};
-    this.set(xarg,yarg);
-    this.print=function(){return "("+this.x+","+this.y+")"};
-}
 
-function LoadedImage(i,j,name){
-    //var valid=["a00","b00","b01","b10","b11","c00","c01","c02","c03","c10","c11","c12","c13",
-    // "c20","c21","c22","c23","c30","c31","c32","c33"];
+var Vector, LoadedImage, Canvas, ImageManager;
 
-    this.name=name;
-    loadedNames.push(this.name);
-    this.elem=document.createElement("img");
-
-    //var x=name.substring(7,10);
-    //console.log("here: "+x);
-    //if(valid.indexOf(x)==-1){console.log("halt!");return}
-
-    this.elem.src=this.name;
-    this.elem.onload=function(){
-        if(zooming){
-            con.drawImage(this,o.x+panel.x*i,o.y+panel.y*j,panel.x,panel.y);
-        }else{
-            con.drawImage(this,o.x+PANEL.x*i,o.y+PANEL.y*j,PANEL.x,PANEL.y);
-        }
+function Vector(xarg, yarg){
+    this.set = function (x, y){
+        this.x = x;
+        this.y = y;
     };
-    this.safe=true;
-    this.print=function(){return "{name:"+this.name+",safe:"+this.safe+"}"};
+    this.set(xarg, yarg);
+
+    this.print = function(){
+        return "(" + this.x + "," + this.y + ")";
+    };
 }
 
-function windowResize(){
-    canvas.style.left=(window.innerWidth-canvas.width)/2+"px";
-    canvas.style.top=(window.innerHeight-canvas.height)/2+"px";
-}windowResize();
+function LoadedImage(i, j, name){
 
-var imgs=[];
-function getImageNames(){
-    for(var loop=0;loop<=MAX_ZOOM;loop++){// from a to c's, 0,1,2
-        var atZoom=[];
-        var int=Math.pow(2,loop);
-        for(var loop2=0;loop2<Math.pow(4,loop);loop2++){ // 0,0-->3,0-->15
-            var newId=String.fromCharCode(loop+97)+Math.floor(loop2/int)+loop2%int;
-            atZoom.push("images/400-by-300/"+newId+".bmp"); // "a00.bmp", "c32.bmp"
+    this.name = name;
+    this.safe = true;
+    this.elem = document.createElement("img");
+    this.elem.src = this.name;
+
+    // this.elem.onload=function(){
+    //     if(zooming){
+    //         var blah = new Vector(o.x + panel.x * i, o.y + panel.y * j);
+    //         canvas.draw(this, blah, panel);
+    //     }else{
+    //         var blah = new Vector(o.x + PANEL.x * i, o.y + PANEL.y * j);
+    //         canvas.draw(this, blah, PANEL);
+    //     }
+    // };
+    var that = this;
+    this.elem.onload = function () {
+        that.draw();
+    };
+
+    this.print=function(){
+        return "{name:" + this.name + ",safe:" + this.safe + "}";
+    };
+
+    this.draw = function () {
+        if (zooming) {
+            var blah = new Vector(o.x + panel.x * i, o.y + panel.y * j);
+            canvas.draw(this.elem, blah, panel);
+        } else {
+            var blah = new Vector(o.x + PANEL.x * i, o.y + PANEL.y * j);
+            canvas.draw(this.elem, blah, PANEL);
         }
-        imgs.push(atZoom);
     }
-}getImageNames();
-
-
-
-
-
-
-
-
-
-
-
-
-canvas.addEventListener("mousedown",function(ev){
-    ev.preventDefault();
-    dragStart(ev);
-});// dragStart on mousedown
-body.addEventListener("mouseup",function(ev){
-    dragStop(ev);
-});// dragStop on mouseup
-
-function dragStart(ev){
-    canvas.className="closedHand";
-    start.set(ev.clientX,ev.clientY);
-    document.addEventListener("mousemove",translate);
 }
 
-function dragStop(ev){
-    canvas.className="openHand";
-    oldo.set(o.x,o.y);
-    document.removeEventListener("mousemove",translate);
+function Canvas() {
+    var element, context;
+
+    this.constructor = function () {
+        element = document.getElementById("canvas");
+        context = element.getContext("2d");
+        this.resize();
+    }
+
+    this.resize = function () {
+        element.style.left = (window.innerWidth - element.width) / 2 + "px";
+        element.style.top = (window.innerHeight - element.height) / 2+ "px";
+    }
+
+    this.clear = function () {
+        element.width = element.width;
+    }
+
+    this.draw = function (blurry, o, blur) {
+        context.drawImage(blurry, o.x, o.y, blur.x, blur.y);
+    }
+
+    this.element = function () {
+        return element;
+    }
+
+    this.constructor();
 }
+
+function ImageManager(){
+    var imageNames, loaded, loadedNames;
+
+    this.constructor = function () {
+        this.populateImageNames();
+        loaded = [];
+        loadedNames = [];
+    }
+
+    this.populateImageNames = function() {
+        imageNames = [];
+        // from a to c's, 0,1,2
+        for (var i = 0; i <= MAX_ZOOM; i++){
+            var atZoom = [];
+            var int = Math.pow(2, i);
+
+            // 0,0-->3,0-->15
+            for (var j = 0; j < Math.pow(4, i); j++){
+                var newId = String.fromCharCode(i + 97) + Math.floor(j / int) + j % int;
+                atZoom.push("images/400-by-300/" + newId + ".bmp"); // "a00.bmp", "c32.bmp"
+            }
+            imageNames.push(atZoom);
+        }
+    }
+
+    this.allUnsafe = function () {
+        for(var each in loaded){
+           loaded[each].safe = false;
+        }
+    }
+
+    this.clean = function () {
+        // remove unused images (images marked as set to safe)
+        for (var i = loaded.length-1; i >=0; i--) {
+            if (!loaded[i].safe) {// if unsafe
+                var removed = loaded.splice(i, 1)[0].name;
+                loadedNames.splice(i, 1);
+            }
+        }
+    }
+
+    this.getBlurry = function () {
+        var blurry = document.createElement("img");
+        console.log(imageNames);
+        console.log(loaded);
+
+        blurry.src = imageNames[0][0];
+        blurry.onload = paint;
+        return blurry;
+    }
+
+    this.load = function (z, i, j, callback) {
+        var id = String.fromCharCode(97 + z) + i + j;// "a00", "c34"
+        var name = "images/400-by-300/" + id + ".bmp";
+        var index = loadedNames.indexOf(name);
+
+        if (index == -1) {
+            loaded.push(new LoadedImage(i, j, name, callback));
+            loadedNames.push(name);
+        } else {
+            loaded[index].draw();
+        }
+    }
+
+
+    this.constructor();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*function onRepeat(){// recursive, calls paint
     paint();

@@ -12,6 +12,10 @@ canvas{
 .closedHand{
 	cursor:url('images/closed-hand.png'),auto;
 }
+#container{
+	position:relative;
+	top:100px;
+}
 #tools{
 	background-color:#9CF;
 	padding:10px;

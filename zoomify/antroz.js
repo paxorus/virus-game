@@ -3,72 +3,102 @@
 Double-clicking the canvas calls zoomToPoint, which repeatedly calls fatten, which calls paint.
 Paint utilizes correctOrigin to quickly give a blurry background and then drawImage to draw clearer images on top.
 
-
 */
 
 var Vector,LoadedImage;// library.js
-var zoomer,canvas,con,body,imgs,MAX_ZOOM;// library.js
+
+var MAX_ZOOM = 2;
+
+var canvas = new Canvas();
+var imageManager = new ImageManager();
+var zoomRange = document.getElementById("zoomRange");
+var body = document.getElementsByTagName("body")[0];
+
 var raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(f) {setTimeout(f,15)};
-var zoomLevel=1;
-var FRAMES=20;
-var o=new Vector(0,0);// origin, top-left
-var oldo=new Vector(0,0);// helper variable for o
-var start=new Vector(0,0);// helper variable for o
-var PANEL=new Vector(400,300);// base image dimensions
-var panel=new Vector(PANEL.x,PANEL.y);// during zooming 400x300-->800x600
-var blur=new Vector(PANEL.x,PANEL.y);// image dimensions
-var VIEW=new Vector(400,300);// canvas dimensions
-var finalPoint,point=new Vector(0,0);// for zoomToPoint
-var zooming=false;// true while zooming effect
-var loadedNames=[];
-var loaded=[];
-// prepare zoomer
-zoomer.max=MAX_ZOOM;
-zoomer.value=zoomLevel;
+var zoomLevel = 1;
+var FRAMES = 20;
+var o = new Vector(0,0);// origin, top-left
+var oldo = new Vector(0,0);// helper variable for o
+var start = new Vector(0,0);// helper variable for o
+var PANEL = new Vector(400,300);// base image dimensions
+var panel = new Vector(PANEL.x,PANEL.y);// during zooming 400x300-->800x600
+var blur = new Vector(PANEL.x,PANEL.y);// image dimensions
+var VIEW = new Vector(400,300);// canvas dimensions
+var finalPoint;
+var point = new Vector(0,0);// for zoomToPoint
+var zooming = false;// true while zooming effect
+// prepare zoomRange
+zoomRange.max = MAX_ZOOM;
+zoomRange.value = zoomLevel;
 // prepare blurry
-var blurry=document.createElement("img");
-blurry.src=imgs[0][0];
-blurry.onload=paint;
+var blurry = imageManager.getBlurry();
 
 
+
+
+// EVENT LISTENERS
 // call zoomToPoint on double-click
-canvas.addEventListener("dblclick",function(ev){
-    if(zoomLevel>=MAX_ZOOM){
+var canvasElem = canvas.element();
+canvasElem.addEventListener("dblclick", function(evt) {
+    if(zoomLevel >= MAX_ZOOM){
         return;
     }
-    zoomer.value=zoomLevel+1;
-    point.set(ev.clientX-canvas.offsetLeft,ev.clientY-canvas.offsetTop);
+    zoomRange.value = zoomLevel + 1;
+    point.set(evt.clientX - canvasElem.offsetLeft, evt.clientY - canvasElem.offsetTop);
     zoomToPoint(point);
+});
+
+canvasElem.addEventListener("mousedown", function(evt) {
+    evt.preventDefault();
+    canvasElem.className = "closedHand";
+    start.set(evt.clientX, evt.clientY);
+    document.addEventListener("mousemove", translate);
+});
+
+document.addEventListener("mouseup", function(evt) {
+    canvasElem.className = "openHand";
+    oldo.set(o.x, o.y);
+    document.removeEventListener("mousemove", translate);
+});
+
+// called on mousemove, listener life from mousedown to mouseup
+function translate(evt){
+    o.set(evt.clientX - start.x + oldo.x, evt.clientY - start.y + oldo.y);
+    paint();
+    evt.stopPropagation();
+}
+
+zoomRange.addEventListener("change", function(evt){
+    zoomLevel = parseInt(evt.target.value,10);
+    paint();
+});
+
+// '+'
+var zoomInButton = document.getElementById("zoomInButton");
+zoomInButton.addEventListener("click", function (evt) {
+    if (zoomLevel >= MAX_ZOOM || zooming) {
+        return;
+    }
+    zoomRange.value=zoomLevel + 1;
+    point.set(VIEW.x / 2, VIEW.y / 2);
+    zoomToPoint();
+});
+
+// '-'
+var zoomOutButton = document.getElementById("zoomOutButton");
+zoomOutButton.addEventListener("click", function (evt) {
+    if (zoomLevel <= 0 || zooming) {
+        return;
+    }
+    zoomRange.value = zoomLevel - 1;
+    point.set(VIEW.x / 2, VIEW.y / 2);
+    zoomFromPoint();
 });
 
 
 
 
 
-
-// paint's good friend, draw tile ij.
-function drawImage(i,j){
-    var name="images/400-by-300/"+String.fromCharCode(97+baseZoomLevel)+i+j+".bmp";
-    var ind=loadedNames.indexOf(name);
-    if(ind==-1){
-        loaded.push(new LoadedImage(i,j,name));
-        //console.log("adding: "+loaded[loaded.length-1].name);
-    }else if(zooming){
-        loaded[ind].safe=true;
-        con.drawImage(loaded[ind].elem,o.x+panel.x*i,o.y+panel.y*j,panel.x,panel.y);
-    }else{
-        loaded[ind].safe=true;
-        con.drawImage(loaded[ind].elem,o.x+PANEL.x*i,o.y+PANEL.y*j,PANEL.x,PANEL.y);
-    }
-}
-
-
-
-// called on mousemove, listener life from dragStart to dragStop
-function translate(ev){
-    o.set(ev.clientX-start.x+oldo.x,ev.clientY-start.y+oldo.y);
-    paint();
-}
 
 // ensure that view is not out of bounds
 function correctOrigin(){
@@ -192,13 +222,13 @@ function fatten2(){// recursive
 // drawImage and mark safe if in bounds, delete all unsafe images
 function paint(){
     correctOrigin();
-    canvas.width=canvas.width;
-    con.drawImage(blurry,o.x,o.y,blur.x,blur.y);
+    canvas.clear();
+    canvas.draw(blurry, o, blur);
 
     // reset all images as unused
-    for(var each in loaded){
-        loaded[each].safe=false;
-    }
+    imageManager.allUnsafe();
+
+
     
     var generic=(zooming)?panel:PANEL;
     // draw relevant images, mark them as used
@@ -208,38 +238,15 @@ function paint(){
 
     for(var i=left.x;i<=right.x;i++){// across x-axis
         for(var j=left.y;j<=right.y;j++){// across y-axis
-            drawImage(i,j);
+            imageManager.load(baseZoomLevel, i, j);
         }
     }
     
-    // remove unused images (images marked as set to safe)
-    for(var each2=loaded.length-1;each2>=0;each2--){
-        if(!loaded[each2].safe){// if unsafe
-            var removed=loaded.splice(each2,1)[0].name;
-            //console.log("removing: "+removed);
-            loadedNames.splice(each2,1);
-        }
-    }
+    imageManager.clean();
 }
 
 
-function incRange(){// '+'
-    if(zoomLevel>=MAX_ZOOM || zooming){
-        return;
-    }
-    console.log("in!");
-    zoomer.value=zoomLevel+1;
-    point.set(VIEW.x/2,VIEW.y/2);
-    zoomToPoint();
-}
-function decRange(){// '-'
-    if(zoomLevel<=0 || zooming){
-        return;
-    }
-    zoomer.value=zoomLevel-1;
-    point.set(VIEW.x/2,VIEW.y/2);
-    zoomFromPoint();
-}
+
 
 
 

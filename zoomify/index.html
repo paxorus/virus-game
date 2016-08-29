@@ -7,18 +7,21 @@
 
 	<body onresize="windowResize()">
 	    
-	<center style="position:relative;top:100px">
-		<span id="tools">
-			<button onclick="incRange()">+</button>
-			<input type="range" id="zoomer" step="1" min="0" onchange="zoomLevel=parseInt(this.value,10);paint()">
-			<button onclick="decRange()">-</button>
-		</span>
-	</center>
+		<center id="container">
+			<span id="tools">
+				<button id="zoomOutButton">-</button>
+				<input type="range" id="zoomRange" step="1" min="0">
+				<button id="zoomInButton">+</button>
 
-	<canvas id="canvas" width="400" height="300" class="orig"></canvas>
-	    
+			</span>
+		</center>
+
+		<canvas id="canvas" width="400" height="300" class="orig"></canvas>
+		
+		<script src="library.js"></script>
+		<script src="antroz.js"></script>
+
 	</body>
-<script src="library.js"></script>
-<script src="antroz.js"></script>
+	
 
 </html>
