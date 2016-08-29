@@ -1,0 +1,24 @@
+<html><head><title>Zoomify</title><style>
+    body{background-color:#000;color:#68F;}
+    canvas{position:absolute;background-color:#FFF;}
+    .openHand{cursor:pointer}
+    .closedHand{cursor:url('closed2.png'),auto;}
+    #tools{background-color:#9CF;padding:10px;padding-top:15px;}
+</style>
+</head>
+<body onresize="windowResize()">
+    
+<center style="position:relative;top:100px">
+	<span id="tools">
+		<button onclick="incRange()">+</button>
+		<input type="range" id="zoomer" step="1" min="0" onchange="zoomLevel=parseInt(this.value,10);paint()">
+		<button onclick="decRange()">-</button>
+	</span>
+</center>
+<canvas id="canvas" width="400" height="300" class="orig"></canvas>
+    
+</body>
+<script src="library.js"></script>
+<script src="antroz.js"></script>
+
+</html>
