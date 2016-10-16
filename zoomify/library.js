@@ -69,14 +69,15 @@ function ImageManager(){
         }
     }
 
+    // assume all loaded images are unnecessary
     this.allUnsafe = function () {
         for (var each in loaded) {
            loaded[each].safe = false;
         }
     }
 
+    // remove unused (safe) images
     this.clean = function () {
-        // remove unused images (images marked as set to safe)
         for (var i = loaded.length - 1; i >= 0; i --) {
             if (!loaded[i].safe) {// if unsafe
                 var removed = loaded.splice(i, 1)[0].name;
@@ -152,72 +153,58 @@ function Zoomer(){
     }
 
 
-
     this.zoomInTo = function(point) {// triggered by dblclick or '+'
         if (zooming) {
             return;
         }
-        zooming = true;
-        oldOrigin.set(origin.x, origin.y);
         finalPoint = new Vector(2 * (oldOrigin.x - point.x) + canvas.dim().x / 2, 2 * (oldOrigin.y - point.y) + canvas.dim().y / 2);
-        baseDepth = depth;
-        f = 0;
-        df = 0;
-        raf(function () {
-            that.fatten();
-        });
+        this.step = this.stepIn;
+        this.startZooming();
     }
 
-    this.zoomOutFrom = function(point) {// triggered by '-'
+    // zoom out while recentering, starts rendering loop
+    this.zoomOutFrom = function(point) {
         if (zooming) {
             return;
         }
+        finalPoint = new Vector(oldOrigin.x / 2 - canvas.dim().x / 4 + point.x, oldOrigin.y / 2 - canvas.dim().y / 4 + point.y);
+        this.step = this.stepOut;
+        this.startZooming();
+    }
 
+    this.stepIn = function () {// recursive
+        depth = baseDepth + df;
+        panel.set((1 + df) * PANEL.x, (1 + df) * PANEL.y);
+    }
+
+    this.stepOut = function () {// recursive
+        depth = baseDepth - df;
+        panel.set((1 - df / 2) * PANEL.x, (1 - df / 2) * PANEL.y);
+    }
+
+    this.startZooming = function () {
         zooming = true;
         oldOrigin.set(origin.x, origin.y);
-        finalPoint = new Vector(oldOrigin.x / 2 - canvas.dim().x / 4 + point.x, oldOrigin.y / 2 - canvas.dim().y / 4 + point.y);
+
         baseDepth = depth;
         f = 0;
         df = 0;
         raf(function () {
-            that.fatten2();
-        });
+            that.animate();
+        });        
     }
 
-    this.fatten = function () {// recursive
+    this.animate = function () {// recursive
         df = f / FRAMES;// f/100
         origin.x = Math.round((finalPoint.x - oldOrigin.x) * df + oldOrigin.x);
         origin.y = Math.round((finalPoint.y - oldOrigin.y) * df + oldOrigin.y);
-        depth = baseDepth + df;
-        panel.set((1 + df) * PANEL.x, (1 + df) * PANEL.y);
-        this.update();
-
-        if(f < FRAMES){
-            f ++;
-            raf(function () {
-                that.fatten();
-            });
-        }else{
-            zooming = false;
-            baseDepth = depth;
-            panel.set(PANEL.x, PANEL.y);
-            oldOrigin.set(origin.x, origin.y);
-            this.update();
-        }
-    }
-
-    this.fatten2 = function () {// recursive
-        df = f / FRAMES;// f/100
-        origin.x = Math.round((finalPoint.x - oldOrigin.x) * df + oldOrigin.x);
-        origin.y = Math.round((finalPoint.y - oldOrigin.y) * df + oldOrigin.y);
-        depth = baseDepth - df;
-        panel.set((1 - df / 2) * PANEL.x, (1 - df / 2) * PANEL.y);
+        this.step();
         this.update();
 
         if (f < FRAMES) {
             f ++;
             raf(function () {
-                that.fatten2();
+                that.animate();
             });
         } else {
             zooming = false;
