@@ -30,10 +30,10 @@ function spinVirus(v,dir){
 }
 function pushVirus(v,dir){
 	if(v.pushing){
-		v.x+=Math.floor(Math.sin(v.theta)*dir);
-		v.y-=Math.floor(Math.cos(v.theta)*dir);
-		v.elem.style.left=v.x;
-		v.elem.style.top=v.y;
+		v.x+=Math.sin(v.theta)*dir;
+		v.y-=Math.cos(v.theta)*dir;
+		v.elem.style.left=Math.floor(v.x);
+		v.elem.style.top=Math.floor(v.y);
 		raf(function(){pushVirus(v,dir)});
 	}
 }

@@ -5,7 +5,7 @@ Infecting host cell generates more viruses
 
 var HOST_NUM=10;
 var DIM=[window.innerWidth,window.innerHeight];
-var body=document.getElementsByTagName("body")[0];
+var body=document.body;
 var host_arr=[];
 for(var i=0;i<HOST_NUM;i++){
 	var img=document.createElement("img");
