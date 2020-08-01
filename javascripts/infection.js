@@ -1,6 +1,6 @@
 /* Prakhar Sahay 03/24/2015
 
-Hitting spacebar begins the attack. Each raf the proximities are studied and damage is applied.
+Hitting spacebar begins the attack. Each animation frame, the proximities are studied and damage is applied.
 */
 
 var lysing=false;// ignore extraneous space bar pressing
@@ -8,13 +8,6 @@ var floating=false;// ignore extraneous lysing
 var STICKINESS=0.2;// probability of sticking
 var PROLIFERATION=4;
 var PROG_SPEED=3;
-
-document.addEventListener("keypress",function(ev){
-	if(ev.keyCode==32 && !lysing){// space
-		lysing=true;
-		infectAll(virus_arr,host_arr);
-	}
-});
 
 function infectAll(v,h){
 	// recalculate infection rates, lysing
@@ -26,7 +19,7 @@ function infectAll(v,h){
 		// find cells in range
 		var targets=[];
 		for(var j=0;j<h.length;j++){
-			if(dist(v[i],h[j])){
+			if(getDistance(v[i],h[j])){
 				targets.push(h[j]);
 			}
 		}
@@ -36,20 +29,19 @@ function infectAll(v,h){
 		}
 		any_targets+=targets.length;
 	}
-	if(any_targets==0){
-		lysing=false;
-	}else{
-		applyDamage(h,function(){infectAll(v,h)});
+	if(any_targets>0){
+		applyDamage(h);
 	}
+	setTimeout(() => infectAll(v,h), 1000);
 }
 
-function dist(v,h){
-	var p=[v.x+50-6*Math.sin(v.theta),v.y+50+6*Math.cos(v.theta)];// piercer
-	var c=[h.x+100,h.y+100];// cell center
-	return Math.sqrt(Math.pow(p[0]-c[0],2)+Math.pow(p[1]-c[1],2))<100;
+function getDistance(virus, host){
+	var piercer=[virus.x+50-6*Math.sin(virus.theta), virus.y+50+6*Math.cos(virus.theta)];
+	var cellCenter=[host.x+100,host.y+100];
+	return Math.sqrt(Math.pow(piercer[0]-cellCenter[0],2)+Math.pow(piercer[1]-cellCenter[1],2))<100;
 }
 
-function applyDamage(h,callback){
+function applyDamage(h){
 	for(var i=0;i<h.length;i++){
 		if(h[i].rate>0){
 			h[i].health-=h[i].rate/24;
@@ -59,7 +51,6 @@ function applyDamage(h,callback){
 			}
 		}
 	}
-	setTimeout(callback,1000);
 }
 
 function lyse(host_cell){
@@ -98,7 +89,7 @@ function expand(c,percent){
 		cell.style.top=c.y-percent/2;
 		cell.style.height=200+percent;
 		cell.style.opacity=1-percent/100;
-		raf(function(){expand(c,percent)});
+		requestAnimationFrame(function(){expand(c,percent)});
 	}
 }
 
@@ -131,7 +122,7 @@ function floatProgeny(){
 			body.removeChild(p.elem);
 		}else if(Math.random()<STICKINESS){
 			for(var k=0;k<host_arr.length;k++){
-				if(dist(p,host_arr[k])){
+				if(getDistance(p,host_arr[k])){
 					console.log("here");
 					k=host_arr.length+10;// break the loop
 					progeny.splice(i,1);
@@ -146,6 +137,6 @@ function floatProgeny(){
 		floating=false;
 	}
 	if(floating){
-		raf(floatProgeny);
+		requestAnimationFrame(floatProgeny);
 	}
 }

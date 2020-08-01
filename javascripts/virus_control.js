@@ -3,13 +3,6 @@
 WASD and arrow keys to move two viruses. 
 */
 
-// var t0,time=0,freq=1000;
-// setInterval(function(){
-// 	document.getElementById("fps_disp").textContent=freq*(time-t0);
-// 	t0=time;
-// },1000/freq);
-var raf= requestAnimationFrame || webkitRequestAnimationFrame || mozRequestAnimationFrame || oRequestAnimationFrame
-	|| msRequestAnimationFrame || function(callback,element){setTimeout(callback,1000/60)};
 function Virus(elem,x,y){
 	this.elem=elem;
 	this.spinning=false;
@@ -25,7 +18,7 @@ function spinVirus(v,dir){
 	if(v.spinning){
 		v.theta+=dir;
 		v.elem.style.webkitTransform=v.getTransform();
-		raf(function(){spinVirus(v,dir)});
+		requestAnimationFrame(function(){spinVirus(v,dir)});
 	}
 }
 function pushVirus(v,dir){
@@ -34,7 +27,7 @@ function pushVirus(v,dir){
 		v.y-=Math.cos(v.theta)*dir;
 		v.elem.style.left=Math.floor(v.x);
 		v.elem.style.top=Math.floor(v.y);
-		raf(function(){pushVirus(v,dir)});
+		requestAnimationFrame(function(){pushVirus(v,dir)});
 	}
 }
 var virus_arr=[
@@ -51,14 +44,14 @@ document.addEventListener("keydown",function(ev){
 			var inProgress=virus_arr[index].spinning;
 			if(!inProgress){
 				virus_arr[index].spinning=true;	
-				raf(function(){spinVirus(virus_arr[index],(ev.keyCode==37 || ev.keyCode==65)?-0.04:0.04)});
+				requestAnimationFrame(function(){spinVirus(virus_arr[index],(ev.keyCode==37 || ev.keyCode==65)?-0.04:0.04)});
 			}
 			break;
 		case 38:case 40:case 87:case 83://up,down
 			var inProgress=virus_arr[index].pushing;
 			if(!inProgress){
 				virus_arr[index].pushing=true;
-				raf(function(){pushVirus(virus_arr[index],(ev.keyCode==40 || ev.keyCode==83)?-5:5)});
+				requestAnimationFrame(function(){pushVirus(virus_arr[index],(ev.keyCode==40 || ev.keyCode==83)?-5:5)});
 			}
 			break;
 		default:return;
@@ -75,3 +68,4 @@ document.addEventListener("keyup",function(ev){
 	}
 });
 
+infectAll(virus_arr,host_arr);
