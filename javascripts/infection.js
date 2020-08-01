@@ -104,7 +104,7 @@ function expand(c,percent){
 
 function getProgeny(){
 	var img=document.createElement("img");
-	img.src="virus.svg";
+	img.src="images/virus.svg";
 	img.className="virus";
 	return img;
 }

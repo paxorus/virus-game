@@ -9,7 +9,7 @@ var body=document.getElementsByTagName("body")[0];
 var host_arr=[];
 for(var i=0;i<HOST_NUM;i++){
 	var img=document.createElement("img");
-	img.src="host.svg";
+	img.src="images/host.svg";
 	img.className=(i%2==0)?"host ying":"host yang";
 	img.id="host"+i;
 	host_arr.push(new Host(img));
