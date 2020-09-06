@@ -47,7 +47,7 @@ function applyDamage(cells){
 	cells
 		.filter(cell => cell.rate > 0)
 		.forEach(cell => {
-			cell.health -= cell.rate /*/ DAMAGE_RATE*/;
+			cell.health -= cell.rate / DAMAGE_RATE;
 			cell.h_disp.textContent = Math.floor(cell.health);
 			if (cell.health <= 0) {
 				cell.lyse();
@@ -74,12 +74,12 @@ function floatProgeny(){
 	// move them all, check for out of bounds, randomly try to anchor one
 	for(var i=0;i<progeny.length;i++){
 		var p=progeny[i];
-		p.x+=Math.floor(Math.sin(p.theta)* CHILD_VIRUS_SPEED);
-		p.y-=Math.floor(Math.cos(p.theta)* CHILD_VIRUS_SPEED);
-		p.elem.style.left=p.x;
-		p.elem.style.top=p.y;
+		p.x+=Math.cos(p.theta)* CHILD_VIRUS_SPEED;
+		p.y-=Math.sin(p.theta)* CHILD_VIRUS_SPEED;
+		p.elem.style.left= Math.floor(p.x);
+		p.elem.style.top = Math.floor(p.y);
 
-		if(p.x<-80 || p.x>DIM[0]+80 || p.y<-80 || p.y>DIM[1]+80){
+		if (hasExitedBoundaries(p)) {
 			progeny.splice(i,1);
 			body.removeChild(p.elem);
 		}else if(Math.random()<STICKINESS){
@@ -100,4 +100,11 @@ function floatProgeny(){
 	if(floating){
 		requestAnimationFrame(floatProgeny);
 	}
+}
+
+function hasExitedBoundaries(virus) {
+	return virus.x < -80
+		|| virus.x > DIM[0] + 80
+		|| virus.y < -80
+		|| virus.y > DIM[1] + 80;
 }
