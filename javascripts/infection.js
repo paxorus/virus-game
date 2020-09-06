@@ -3,11 +3,9 @@
 Hitting spacebar begins the attack. Each animation frame, the proximities are studied and damage is applied.
 */
 
-var lysing=false;// ignore extraneous space bar pressing
 var floating=false;// ignore extraneous lysing
-var STICKINESS=0.2;// probability of sticking
 var CHILD_VIRUS_SPEED = 3;
-const DAMAGE_RATE = 24;
+const DAMAGE_RATE = 0.3;
 const DAMAGE_RADIUS = 100;
 
 function infectAll(viruses, cells){
@@ -27,6 +25,11 @@ function infectAll(viruses, cells){
 			cell.rate += DAMAGE_RATE / targets.length;
 		});
 
+		// Pause any child viruses.
+		if (virus instanceof ChildVirus) {
+			virus.pushing = targets.length === 0;
+		}
+
 		any_targets+=targets.length;
 	});
 
@@ -34,7 +37,7 @@ function infectAll(viruses, cells){
 		applyDamage(cells);
 	}
 
-	setTimeout(() => infectAll(viruses, cells), 1000);
+	setTimeout(() => infectAll(viruses, cells), 100);
 }
 
 function getDistance(virus, host){
@@ -47,7 +50,7 @@ function applyDamage(cells){
 	cells
 		.filter(cell => cell.rate > 0)
 		.forEach(cell => {
-			cell.health -= cell.rate / DAMAGE_RATE;
+			cell.health -= cell.rate;
 			cell.h_disp.textContent = Math.floor(cell.health);
 			if (cell.health <= 0) {
 				cell.lyse();
@@ -64,38 +67,36 @@ function getProgeny(){
 
 function setProgeny(virus){
 	var theta=Math.random()*2*Math.PI;
-	progeny.push(virus);
+	virus_arr.push(virus);
 	body.appendChild(virus.elem);
-	virus.theta=theta;
-	virus.elem.style.webkitTransform=virus.getTransform();
+	virus.applyAngle(theta);
 }
 
 function floatProgeny(){
-	// move them all, check for out of bounds, randomly try to anchor one
-	for(var i=0;i<progeny.length;i++){
-		var p=progeny[i];
-		p.x+=Math.cos(p.theta)* CHILD_VIRUS_SPEED;
-		p.y-=Math.sin(p.theta)* CHILD_VIRUS_SPEED;
-		p.elem.style.left= Math.floor(p.x);
-		p.elem.style.top = Math.floor(p.y);
 
+	const progeny = virus_arr.filter(virus => virus instanceof ChildVirus);
+
+	for(var i=0;i<progeny.length;i++){
+		const p=progeny[i];
+
+		// Move the child virus.
+		if (p.pushing) {
+			p.x += Math.cos(p.theta)* CHILD_VIRUS_SPEED;
+			p.y -= Math.sin(p.theta)* CHILD_VIRUS_SPEED;
+			p.elem.style.left = Math.floor(p.x);
+			p.elem.style.top = Math.floor(p.y);
+		}
+
+		// Delete if out of bounds.
 		if (hasExitedBoundaries(p)) {
-			progeny.splice(i,1);
+			virus_arr.remove(p);
 			body.removeChild(p.elem);
-		}else if(Math.random()<STICKINESS){
-			for(var k=0;k<host_arr.length;k++){
-				if(getDistance(p,host_arr[k]) < DAMAGE_RADIUS){
-					k=host_arr.length+10;// break the loop
-					progeny.splice(i,1);
-					virus_arr.push(p);
-				}
-			}
 		}
 	}
 	
 	// check if any within map
-	if(progeny.length==0){
-		floating=false;
+	if(progeny.length === 0){
+		floating = false;
 	}
 	if(floating){
 		requestAnimationFrame(floatProgeny);

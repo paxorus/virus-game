@@ -12,8 +12,7 @@ function Host(elem,i){
 
 	this.lyse = function () {
 		// Remove from host_arr.
-		const idx = host_arr.findIndex(cell => cell === this);
-		host_arr.splice(idx, 1);
+		host_arr.remove(this);
 
 		// Remove from DOM.
 		body.removeChild(this.h_disp);
@@ -25,11 +24,13 @@ function Host(elem,i){
 		var y=this.y+63;
 		for(var i=0;i<PROLIFERATION;i++){
 			var elem=getProgeny();
-			var new_vir=new Virus(elem,x,y);
+			var new_vir=new ChildVirus(elem,x,y);
 			setProgeny(new_vir);
 		}
+
+		// Start the motion loop for child viruses.
 		if(!floating){
-			floating=true;
+			floating = true;
 			floatProgeny();
 		}
 	};

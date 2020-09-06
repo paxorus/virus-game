@@ -3,23 +3,36 @@
 WASD and arrow keys to move two viruses. 
 */
 
-function Virus(elem,x,y){
-	this.elem=elem;
-	this.spinning=false;
-	this.pushing=false;
-	this.theta= Math.PI / 2;
-	this.x=this.elem.style.left=x;
-	this.y=this.elem.style.top=y;
-	this.getTransform=function(){
-		// Theta is counter-clockwise from +x, but rotate(deg) works clockwise from +y.
-		return "rotate("+Math.floor(90 - this.theta * 180 / Math.PI)+"deg)";
+class Virus {
+
+	constructor(elem, x, y) {
+		this.elem=elem;
+		this.spinning=false;
+		this.pushing=false;
+		this.theta= Math.PI / 2;
+		this.x=this.elem.style.left=x;
+		this.y=this.elem.style.top=y;
 	}
+
+	applyAngle(theta) {
+		// Theta is counter-clockwise from +x, but rotate(deg) works clockwise from +y.
+		this.elem.style.webkitTransform = "rotate("+Math.floor(90 - theta * 180 / Math.PI)+"deg)";
+		this.theta = theta;
+	}
+}
+
+class ChildVirus extends Virus {
+
+	constructor(elem, x, y) {
+		super(elem, x, y);
+		this.pushing = true;
+	}
+
 }
 
 function spinVirus(v,dir){
 	if(v.spinning){
-		v.theta+=dir;
-		v.elem.style.webkitTransform=v.getTransform();
+		v.applyAngle(v.theta + dir);
 		requestAnimationFrame(function(){spinVirus(v,dir)});
 	}
 }

@@ -7,7 +7,7 @@
 		.macro{position:absolute;width:200px;height:200px;}
 		.health_disp{position:absolute;color:white;line-height:200px;width:200px;text-align:center;font-size:36px;z-index:5;font-family:'Ubuntu';}
 	</style>
-	<link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu">
 	<link rel="stylesheet" href="stylesheets/morph.css">
 	</head>
 	<body style="overflow:hidden">
@@ -20,12 +20,17 @@
 		<script src="javascripts/host.js"></script>
 		<script src="javascripts/virus_control.js"></script>
 		<script>
+			Array.prototype.remove = function (x) {
+				const idx = this.findIndex(y => y === x);
+				if (idx !== -1) {
+					this.splice(idx, 1);
+				}
+			};
+
 			var virus_arr=[
 				new Virus(document.getElementById("blue_vir"),50,50),
 				new Virus(document.getElementById("red_vir"),300,300)
 			];
-
-			var progeny=[];
 
 			var host_arr=[];
 
