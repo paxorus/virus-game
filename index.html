@@ -19,6 +19,26 @@
 		<script src="javascripts/infection.js"></script>
 		<script src="javascripts/host.js"></script>
 		<script src="javascripts/virus_control.js"></script>
+		<script>
+			var virus_arr=[
+				new Virus(document.getElementById("blue_vir"),50,50),
+				new Virus(document.getElementById("red_vir"),300,300)
+			];
+
+			var progeny=[];
+
+			var host_arr=[];
+
+			for(var i=0;i<HOST_NUM;i++){
+				var img=document.createElement("img");
+				img.src="images/host.svg";
+				img.className=(i%2==0)?"host ying":"host yang";
+				img.id="host"+i;
+				host_arr.push(new Host(img));
+				body.appendChild(img);
+			}
+			infectAll(virus_arr,host_arr);
+		</script>
 
 	</body>
 </html>

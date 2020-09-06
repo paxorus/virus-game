@@ -14,6 +14,7 @@ function Virus(elem,x,y){
 		return "rotate("+Math.floor(this.theta*180/Math.PI)+"deg)";
 	}
 }
+
 function spinVirus(v,dir){
 	if(v.spinning){
 		v.theta+=dir;
@@ -21,6 +22,7 @@ function spinVirus(v,dir){
 		requestAnimationFrame(function(){spinVirus(v,dir)});
 	}
 }
+
 function pushVirus(v,dir){
 	if(v.pushing){
 		v.x+=Math.sin(v.theta)*dir;
@@ -30,11 +32,6 @@ function pushVirus(v,dir){
 		requestAnimationFrame(function(){pushVirus(v,dir)});
 	}
 }
-var virus_arr=[
-	new Virus(document.getElementById("blue_vir"),50,50),
-	new Virus(document.getElementById("red_vir"),300,300)
-];
-var progeny=[];
 
 document.addEventListener("keydown",function(ev){
 	var index=(ev.keyCode<60)?0:1;
@@ -56,9 +53,8 @@ document.addEventListener("keydown",function(ev){
 			break;
 		default:return;
 	}
-
-
 });
+
 document.addEventListener("keyup",function(ev){
 	var index=(ev.keyCode<60)?0:1;
 	switch(ev.keyCode){
@@ -67,5 +63,3 @@ document.addEventListener("keyup",function(ev){
 		default:return;
 	}
 });
-
-infectAll(virus_arr,host_arr);

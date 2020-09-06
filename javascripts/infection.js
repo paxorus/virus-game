@@ -6,91 +6,53 @@ Hitting spacebar begins the attack. Each animation frame, the proximities are st
 var lysing=false;// ignore extraneous space bar pressing
 var floating=false;// ignore extraneous lysing
 var STICKINESS=0.2;// probability of sticking
-var PROLIFERATION=4;
-var PROG_SPEED=3;
+var CHILD_VIRUS_SPEED = 3;
+const DAMAGE_RATE = 24;
+const DAMAGE_RADIUS = 100;
 
-function infectAll(v,h){
+function infectAll(viruses, cells){
 	// recalculate infection rates, lysing
-	for(var l=0;l<h.length;l++){
-		h[l].rate=0;
-	}
+	cells.forEach(cell => {
+		cell.rate = 0;
+	});
+
 	var any_targets=0;
-	for(var i=0;i<v.length;i++){
+
+	viruses.forEach(virus => {
 		// find cells in range
-		var targets=[];
-		for(var j=0;j<h.length;j++){
-			if(getDistance(v[i],h[j])){
-				targets.push(h[j]);
-			}
-		}
-		// divide 24 across targets
-		for(var k=0;k<targets.length;k++){
-			targets[k].rate+=24/targets.length;
-		}
+		const targets = cells.filter(cell => getDistance(virus, cell) < DAMAGE_RADIUS);
+
+		// divide damage across targets
+		targets.forEach(cell => {
+			cell.rate += DAMAGE_RATE / targets.length;
+		});
+
 		any_targets+=targets.length;
+	});
+
+	if (any_targets > 0) {
+		applyDamage(cells);
 	}
-	if(any_targets>0){
-		applyDamage(h);
-	}
-	setTimeout(() => infectAll(v,h), 1000);
+
+	setTimeout(() => infectAll(viruses, cells), 1000);
 }
 
 function getDistance(virus, host){
 	var piercer=[virus.x+50-6*Math.sin(virus.theta), virus.y+50+6*Math.cos(virus.theta)];
 	var cellCenter=[host.x+100,host.y+100];
-	return Math.sqrt(Math.pow(piercer[0]-cellCenter[0],2)+Math.pow(piercer[1]-cellCenter[1],2))<100;
+	return Math.sqrt(Math.pow(piercer[0]-cellCenter[0],2)+Math.pow(piercer[1]-cellCenter[1],2));
 }
 
-function applyDamage(h){
-	for(var i=0;i<h.length;i++){
-		if(h[i].rate>0){
-			h[i].health-=h[i].rate/24;
-			h[i].h_disp.textContent=Math.floor(h[i].health);
-			if(h[i].health<=0){
-				lyse(h[i]);
+function applyDamage(cells){
+	cells
+		.filter(cell => cell.rate > 0)
+		.forEach(cell => {
+			cell.health -= cell.rate /*/ DAMAGE_RATE*/;
+			cell.h_disp.textContent = Math.floor(cell.health);
+			if (cell.health <= 0) {
+				cell.lyse();
 			}
-		}
-	}
-}
-
-function lyse(host_cell){
-	var id=host_cell.elem.id;
-	for(var j=0,go=true;go && j<host_arr.length;j++){// selective pop
-		if(id==host_arr[j].elem.id){
-			go=false;
-		}
-	}
-	host_arr.splice(j-1,1);
-	body.removeChild(host_cell.h_disp);
-	expand(host_cell,0);
-
-	// spawn viruses
-	var x=host_cell.x+63;
-	var y=host_cell.y+63;
-	for(var i=0;i<PROLIFERATION;i++){
-		var elem=getProgeny();
-		var new_vir=new Virus(elem,x,y);
-		setProgeny(new_vir);
-	}
-	if(!floating){
-		floating=true;
-		floatProgeny();
-	}
-}
-
-function expand(c,percent){
-	if(percent>=100){
-		body.removeChild(c.elem);
-	}else{
-		percent+=3;
-		var cell=c.elem;
-		cell.style.width=200+percent;
-		cell.style.left=c.x-percent/2;
-		cell.style.top=c.y-percent/2;
-		cell.style.height=200+percent;
-		cell.style.opacity=1-percent/100;
-		requestAnimationFrame(function(){expand(c,percent)});
-	}
+		});
 }
 
 function getProgeny(){
@@ -112,8 +74,8 @@ function floatProgeny(){
 	// move them all, check for out of bounds, randomly try to anchor one
 	for(var i=0;i<progeny.length;i++){
 		var p=progeny[i];
-		p.x+=Math.floor(Math.sin(p.theta)*PROG_SPEED);
-		p.y-=Math.floor(Math.cos(p.theta)*PROG_SPEED);
+		p.x+=Math.floor(Math.sin(p.theta)* CHILD_VIRUS_SPEED);
+		p.y-=Math.floor(Math.cos(p.theta)* CHILD_VIRUS_SPEED);
 		p.elem.style.left=p.x;
 		p.elem.style.top=p.y;
 
@@ -122,8 +84,7 @@ function floatProgeny(){
 			body.removeChild(p.elem);
 		}else if(Math.random()<STICKINESS){
 			for(var k=0;k<host_arr.length;k++){
-				if(getDistance(p,host_arr[k])){
-					console.log("here");
+				if(getDistance(p,host_arr[k]) < DAMAGE_RADIUS){
 					k=host_arr.length+10;// break the loop
 					progeny.splice(i,1);
 					virus_arr.push(p);
